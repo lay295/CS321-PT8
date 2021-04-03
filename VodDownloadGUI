@@ -18,12 +18,16 @@ def start_button():
     save_name.set(SaveFileNameTxt.get())
     global folder_path
     folder_path.set(SaveDestTxt.get())
-    global time_length
-    time_length.set(spinbox.get())
     global input_url
     input_url.set(URLtxt.get())
+    global time_length
+    safe = spinbox.get().isdecimal()
+    if safe:
+        time_length.set(spinbox.get())
+    else:
+        sanitize_time_length_failed()
 
-    if handle_folder_path_check() and handle_time_length_check() and handle_input_url_check() and handle_save_name_check():
+    if safe and handle_folder_path_check() and handle_time_length_check() and handle_input_url_check() and handle_save_name_check():
         lbl5.config(text="Correct Settings: Starting")
         clear_labels()
         start()
@@ -45,6 +49,10 @@ def handle_save_name_check():
         return False
     lbl7.config(text="Valid Name")
     return True
+
+
+def sanitize_time_length_failed():
+    lbl6.config(text="Length contains non-number")
 
 
 def handle_time_length_check():
