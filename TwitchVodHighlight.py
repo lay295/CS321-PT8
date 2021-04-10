@@ -40,11 +40,11 @@ def start():
     #time_length
 
     #initalized 2d array for start and end time
-    clipTimes = [100][1]
+    #example data before I finish analyze
+    clipTimes = [[10.0, 20.0], [25.0, 40.0], [63.4, 75.0]]
     #Uses videoID as a link
     download_video(input_url.get(), clipTimes)
-    
-    #download_chat(videoId)
+    download_chat(input_url.get())
     
     if os.path.exists('sound.mp3'):
         os.remove('sound.mp3')
@@ -53,9 +53,13 @@ def start():
         #os.remove('VODEdited.mp4')
     if os.path.exists('VOD.mp4'):
         os.remove('VOD.mp4')
+
+    analyze()
     #move to desired directory
     shutil.move(save_name + '.mp4' , folder_path)
     
+def analyze():
+    return
 
 def start_button():
     #Saves all the globals that are currently in the fillable boxes
