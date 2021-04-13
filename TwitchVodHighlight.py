@@ -6,6 +6,11 @@ import os
 from tkinter import filedialog
 from tkinter import *
 import shutil
+import csv
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.naive_bayes import MultinomialNB
+import math
 '''
 def main():
 
@@ -39,12 +44,12 @@ def start():
     #input_url
     #time_length
 
-    #initalized 2d array for start and end time
-    #example data before I finish analyze
-    clipTimes = [[10.0, 20.0], [25.0, 40.0], [63.4, 75.0]]
     #Uses videoID as a link
     download_video(input_url.get(), clipTimes)
     download_chat(input_url.get())
+
+    #initalized 2d array for start and end time
+    clipTimes = analyze()
     
     if os.path.exists('sound.mp3'):
         os.remove('sound.mp3')
@@ -54,12 +59,46 @@ def start():
     if os.path.exists('VOD.mp4'):
         os.remove('VOD.mp4')
 
-    analyze()
+    
     #move to desired directory
     shutil.move(save_name + '.mp4' , folder_path)
     
 def analyze():
-    return
+    with open('chat.json') as json_file:
+        data = json.load(json_file)
+    
+    #last comment shows how long the VOD is
+    length = data[-1]['content_offset_seconds']
+    output = []
+
+    #sample positive sentiment comments over every minute
+    for i in range(math.ceil(length/60)):
+        min = i * 60
+        max = min + 60
+        messages = []
+        for comment in data:
+            if comment['content_offset_seconds'] > min and comment['content_offset_seconds'] < max:
+                messages.append(comment['message']['body'])
+        
+        X_new_counts = count_vect.transform(messages)
+        X_new_tfidf = tfidf_transformer.transform(X_new_counts)
+        predicted = clf.predict(X_new_tfidf)
+        output.append(sum(predicted))
+        messages.clear()
+
+    #Top 10 moments sorted cronologically
+    #https://stackoverflow.com/questions/13070461/get-indices-of-the-top-n-values-of-a-list
+    top = sorted(sorted(range(len(output)), key=lambda i: output[i], reverse=True)[:10])
+
+    timelist = []
+    for index in top:
+        newlist = []
+        start = index * 60
+        end = start + 60
+        newlist.append(start)
+        newlist.append(end)
+        timelist.append(newlist)
+    return timeList
 
 def start_button():
     #Saves all the globals that are currently in the fillable boxes
