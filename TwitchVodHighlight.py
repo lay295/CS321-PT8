@@ -45,12 +45,15 @@ def start():
     #time_length
 
     #Uses videoID as a link
-    download_video(input_url.get(), clipTimes)
-    download_chat(input_url.get())
+    download_video(input_url.get())
+    videoId = input_url.get().split('/')
+    download_chat(videoId[4])
 
     #initalized 2d array for start and end time
     clipTimes = analyze()
-    
+    highlightVideoAnalyzer(clipTimes)
+
+
     if os.path.exists('sound.mp3'):
         os.remove('sound.mp3')
     #This needs to be worked on: says that a process is open, so it can not delete video
@@ -61,12 +64,20 @@ def start():
 
     
     #move to desired directory
-    shutil.move(save_name + '.mp4' , folder_path)
+    shutil.move(save_name.get() + '.mp4' , folder_path)
     
 def analyze():
     train_data = []
     train_result = []
-    with open('data.csv', encoding="mbcs") as csv_file:
+    '''
+    for r,d,f in os.walk("c:\\"):
+        for files in f:
+            if files == "data.csv":
+              print (os.path.join(r,files))
+    '''
+    data_file = r"C:\Users\Antwa\OneDrive\Documents\GitHub\CS321-PT8\data.csv"
+   
+    with open(data_file, encoding="mbcs") as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         for row in csv_reader:
@@ -118,7 +129,7 @@ def analyze():
         newlist.append(start)
         newlist.append(end)
         timelist.append(newlist)
-    return timeList
+    return timelist
 
 def start_button():
     #Saves all the globals that are currently in the fillable boxes
@@ -277,7 +288,7 @@ def download_chat(videoId):
     chatFile.write(json.dumps(comments))
 
 # Download video as video.mp4
-def download_video(videoId, time):
+def download_video(videoId):
     print('Downloading video for ' + videoId)
 
     ydl_opts = { 
@@ -288,6 +299,7 @@ def download_video(videoId, time):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
        ydl.download([videoId])
 
+def highlightVideoAnalyzer(time):
     #Variable array to store videoclips
     video = VideoFileClip('VOD.mp4')  #clip that is saved
     audio = AudioFileClip('VOD.mp4')
@@ -296,40 +308,26 @@ def download_video(videoId, time):
 
     #Start and end time for the clip in seconds
     #NOTE: does not work with a 0 second start time
-    start = 300
-    end = 310
 
     #Code for a double array time[cliptimes][0] (start time) time[cliptimes][1] (end time) 
-    '''
-    for clipTimes in range(len(time[clipTimes])):
-        clips = video.subclip(time[clipTimes][0],time[clipTimes][1])
-        audio_clips = audio.subclip(start,end)
+    i= 0
+    for clipNum in range(len(time)):
+        clips = video.subclip(time[clipNum][0],time[clipNum][1])
+        audio_clips = audio.subclip(time[clipNum][0],time[clipNum][1])
 
         video_array.append(clips) #creates an array for all clips
         audio_array.append(audio_clips)
-    '''
-    # Test peaks at 5min 10 min 15 min that last 1/2 a minute each
-    x = 0
-    for x in range(3): #Change for loop to match comment peak times
-        clips = video.subclip(start,end)
-        audio_clips = audio.subclip(start,end)
+        i += 1
+        print("Percentage is ",(clipNum/(len(time))))
 
-        video_array.append(clips) #creates an array for all clips
-        audio_array.append(audio_clips)
-
-        #Adds 5 min for clip difference
-        start += (300) 
-        end += (300)
-    
-    
     #Creates tmps of the combined audio and video files
     video = concatenate_videoclips(video_array)
     audio = concatenate_audioclips(audio_array)
 
     #Attempt to close all possible opened files
-    while not video_array is None:
-        video_array.pop
-        audio_array.pop
+    video_array.clear
+    audio_array.clear
+    print('videos & audios cleared')
 
     #exports both tmp files files
     audio.write_audiofile('sound.mp3')
@@ -338,7 +336,7 @@ def download_video(videoId, time):
     #Calls files exported to combine the audio and video
     final = VideoFileClip('VODEdited.mp4')
     final = final.set_audio(AudioFileClip('sound.mp3'))
-    final.write_videofile(save_name + '.mp4')
+    final.write_videofile(save_name.get() + '.mp4')
 
     
     clips.close()
