@@ -64,6 +64,26 @@ def start():
     shutil.move(save_name + '.mp4' , folder_path)
     
 def analyze():
+    train_data = []
+    train_result = []
+    with open('data.csv', encoding="mbcs") as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if line_count != 0:
+                train_data.append(row[0:-1][0])
+                train_result.append(int(row[-1]))
+            line_count += 1
+
+    count_vect = CountVectorizer()
+    X_train_counts = count_vect.fit_transform(train_data)
+    X_train_counts.shape
+    tfidf_transformer = TfidfTransformer()
+    X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
+    X_train_tfidf.shape
+
+    clf = MultinomialNB().fit(X_train_tfidf, train_result)
+
     with open('chat.json') as json_file:
         data = json.load(json_file)
     
