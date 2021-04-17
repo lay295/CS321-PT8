@@ -119,7 +119,7 @@ def analyze():
 
     #Top 10 moments sorted cronologically
     #https://stackoverflow.com/questions/13070461/get-indices-of-the-top-n-values-of-a-list
-    top = sorted(sorted(range(len(output)), key=lambda i: output[i], reverse=True)[:10])
+    top = sorted(sorted(range(len(output)), key=lambda i: output[i], reverse=True)[:int(time_length.get())])
 
     timelist = []
     for index in top:
